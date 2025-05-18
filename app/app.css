@@ -1,13 +1,23 @@
-@import "tailwindcss";
+@import "sanitize.css";
+@import "sanitize.css/forms.css";
+@import "sanitize.css/typography.css";
 
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.container .content {
+  width: 100%;
+  max-width: 1366px;
 }
 
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  background-color: #212121;
 
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;

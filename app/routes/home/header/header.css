@@ -1,0 +1,68 @@
+.header {
+  width: 100%;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  /* !!!Altura do Header!!! */
+  height: 162px;
+}
+
+/* 
+  Logo
+*/
+.header .logo-container {
+  display: block;
+  font-size: 1.25em;
+}
+
+/* 
+  Navigation
+*/
+.header nav ul {
+  list-style: none;
+  padding-left: 0;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.header nav ul li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header nav ul li a {
+  padding-left: 1rem;
+  padding-right: 1rem;
+
+  font-weight: 500;
+  letter-spacing: -0.04em;
+
+  color: #999999;
+  text-decoration: none;
+}
+
+.header nav ul li a:hover {
+  color: #e6e6e6;
+}
+
+.header nav ul li a:last-child {
+  padding-right: 0;
+}
+
+.header-content {
+  width: 100%;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+  padding-left: 3rem;
+  padding-right: 3rem;
+}
