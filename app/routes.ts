@@ -1,3 +1,9 @@
-import { type RouteConfig, index } from "@react-router/dev/routes";
+import { type RouteConfig, index, route } from "@react-router/dev/routes";
 
-export default [index("routes/home/home.tsx")] satisfies RouteConfig;
+// Home (autocomplete) + detalhe de CEP + caminho semântico por slug.
+// O "*" captura /{estado}/{cidade?}/{bairro?}/{rua?} e resolve no backend.
+export default [
+  index("routes/home/home.tsx"),
+  route("cep/:cep", "routes/cep/cep.tsx"),
+  route("*", "routes/local/local.tsx"),
+] satisfies RouteConfig;

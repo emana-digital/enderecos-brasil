@@ -1,54 +1,70 @@
 import {
-  memo,
-  startTransition,
-  useCallback,
-  useState,
+  forwardRef,
   type ChangeEventHandler,
-  type FC,
+  type FocusEventHandler,
+  type KeyboardEventHandler,
 } from "react";
 
 import "./input.css";
 
-export const Input: FC<{
-  onChangeText: (text: string) => void;
-  onFocus: () => void;
-  onBlur: () => void;
-}> = memo(
-  ({ onChangeText, onFocus, onBlur }) => {
-    const [inputText, setInputText] = useState<string>("");
+export interface InputProps {
+  value: string;
+  /** Cauda da sugestão inline (ghost text) exibida após o texto digitado. */
+  ghostTail: string;
+  placeholder?: string;
+  onChange: ChangeEventHandler<HTMLInputElement>;
+  onKeyDown: KeyboardEventHandler<HTMLInputElement>;
+  onFocus: FocusEventHandler<HTMLInputElement>;
+  onBlur: FocusEventHandler<HTMLInputElement>;
+  ariaControls?: string;
+  ariaActiveDescendant?: string;
+}
 
-    const onChangeTextInput = useCallback<ChangeEventHandler<HTMLInputElement>>(
-      (event) => {
-        const inputValue = event.target.value;
-        setInputText(inputValue);
-        startTransition(() => {
-          onChangeText(inputValue);
-        });
-      },
-      [onChangeText]
-    );
-
-    const onFocusInput = useCallback(() => {
-      onFocus();
-    }, [onFocus]);
-
-    const onBlurInput = useCallback(() => {
-      onBlur();
-    }, [onBlur]);
-
-    return (
-      <input
-        type="text"
-        value={inputText}
-        onChange={onChangeTextInput}
-        onFocus={onFocusInput}
-        onBlur={onBlurInput}
-        autoComplete="off"
-        spellCheck="false"
-      />
-    );
+/**
+ * Campo controlado com autocomplete inline. A camada `ghost` fica exatamente
+ * sobre o input: o texto digitado é renderizado transparente (só pra ocupar a
+ * largura certa) e a cauda sugerida aparece em cinza logo após o cursor.
+ */
+export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+  {
+    value,
+    ghostTail,
+    placeholder,
+    onChange,
+    onKeyDown,
+    onFocus,
+    onBlur,
+    ariaControls,
+    ariaActiveDescendant,
   },
-  () => true
-);
-
-Input.displayName = "Input";
+  ref
+) {
+  return (
+    <div className="address-input">
+      <div className="address-input-ghost" aria-hidden="true">
+        <span className="ghost-typed">{value}</span>
+        <span className="ghost-tail">{ghostTail}</span>
+      </div>
+      <input
+        ref={ref}
+        type="text"
+        className="address-input-field"
+        value={value}
+        placeholder={placeholder}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck={false}
+        role="combobox"
+        aria-expanded={Boolean(ariaControls)}
+        aria-autocomplete="list"
+        aria-controls={ariaControls}
+        aria-activedescendant={ariaActiveDescendant}
+      />
+    </div>
+  );
+});

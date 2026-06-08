@@ -4,3 +4,6 @@
 # React Router
 /.react-router/
 /build/
+
+# Env overrides locais (não versionar)
+.env*.local

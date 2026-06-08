@@ -6,8 +6,10 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
+import { SWRConfig } from "swr";
 
 import type { Route } from "./+types/root";
+import { fetcher } from "~/lib";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -42,7 +44,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    // Cache global: a key é a URL, então a mesma consulta nunca é refeita.
+    // Resultados ficam "frescos" no cache e voltam instantâneos ao reusar a
+    // query (ex.: apagar e redigitar). `keepPreviousData` evita flicker entre
+    // teclas; revalidação desligada para não gastar a API à toa.
+    <SWRConfig
+      value={{
+        fetcher,
+        keepPreviousData: true,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+        revalidateIfStale: false,
+        dedupingInterval: 600_000,
+        shouldRetryOnError: false,
+      }}
+    >
+      <Outlet />
+    </SWRConfig>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

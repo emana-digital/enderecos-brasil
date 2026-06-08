@@ -7,6 +7,8 @@
 }
 
 .input-container {
+  position: relative;
+
   width: 100%;
 
   display: flex;
@@ -16,6 +18,7 @@
   border-radius: 1rem;
   background-color: #333333;
   box-shadow: 0.25rem 0.5rem 1rem rgba(0, 0, 0, 0.05);
+  transition: outline-color 0.15s ease;
 }
 
 .is-on-focus .input-container {
@@ -25,16 +28,26 @@
 .search-divider {
   width: 1px;
   height: 2rem;
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
 }
 
 .submit-search {
+  display: flex;
+  align-items: center;
+
   padding: 0 1rem;
   border: none;
+  background: transparent;
   cursor: pointer;
 }
 
-.debug-container {
-  margin-top: 1rem;
-  width: 100%;
+.search-hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+  color: #8a8a8a;
+}
+
+.search-hint strong {
+  color: #cfcfcf;
 }
