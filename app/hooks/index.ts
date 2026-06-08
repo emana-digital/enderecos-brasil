@@ -3,3 +3,4 @@
 export { useAddressSearch, type UseAddressSearchResult } from "./useAddressSearch";
 export { useDebouncedValue } from "./useDebouncedValue";
 export { useSearchHistory, type UseSearchHistory } from "./useSearchHistory";
+export { useStats, type UseStatsResult } from "./useStats";

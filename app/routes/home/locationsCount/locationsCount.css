@@ -1,0 +1,15 @@
+.locations-count {
+  grid-row: 3;
+  align-self: start;
+  margin-top: 2.5rem;
+  min-height: 1.5em;
+  font-size: 1.0625em;
+  color: #8a8a8a;
+  text-align: center;
+  user-select: none;
+}
+
+.locations-count strong {
+  font-weight: 600;
+  color: #c9c9c9;
+}

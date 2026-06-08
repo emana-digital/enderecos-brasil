@@ -20,6 +20,31 @@
 
   max-height: 60vh;
   overflow-y: auto;
+
+  /* Scrollbar sutil (Firefox). */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+}
+
+/* Scrollbar sutil (WebKit/Chromium). O thumb fino vem da borda transparente
+   + background-clip, com a track invisível. */
+.suggestions-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.suggestions-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.suggestions-list::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.14);
+  border-radius: 9999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+.suggestions-list::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.24);
 }
 
 .suggestions-section {

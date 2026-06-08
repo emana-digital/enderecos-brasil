@@ -4,6 +4,7 @@ import { HeroSection } from "~/components/heroSection";
 
 import "./home.css";
 import { Header } from "./header";
+import { LocationsCount } from "./locationsCount";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -31,6 +32,7 @@ export default function Home() {
         <div className="hero-input-block">
           <AddressSearchInput />
         </div>
+        <LocationsCount />
       </HeroSection>
     </>
   );

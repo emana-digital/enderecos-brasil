@@ -1,0 +1,1 @@
+export { LocationsCount } from "./locationsCount";
