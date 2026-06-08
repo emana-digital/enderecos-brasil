@@ -24,11 +24,8 @@ export default function Home() {
         <div className="hero-text-block">
           <h1>Dados de endereços do Brasil</h1>
           <p>
-            Atualizado em tempo real com dados públicos, editado e conferido
-            pela comunidade.
-          </p>
-          <p>
-            Consulte informações sobre endereços. Consuma os dados como quiser.
+            Pesquise ruas, bairros, cidades e CEPs em uma base aberta,
+            construída a partir de dados públicos.
           </p>
         </div>
         <div className="hero-input-block">
