@@ -1,4 +1,5 @@
 export * from "./api";
+export * from "./labels";
 export * from "./cep";
 export * from "./text";
 export * from "./parseQuery";

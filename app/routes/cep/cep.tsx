@@ -1,7 +1,16 @@
 import { data, Link, useLocation } from "react-router";
+import useSWR from "swr";
 
 import type { Route } from "./+types/cep";
-import { DetailLayout, Field, type NavFrom } from "~/components/detailLayout";
+import {
+  DetailLayout,
+  DetailSkeletonFields,
+  DetailSkeletonList,
+  Field,
+  SkeletonLine,
+  type DetailPreview,
+  type NavFrom,
+} from "~/components/detailLayout";
 import {
   endpoints,
   fetcher,
@@ -20,8 +29,7 @@ export function meta({ params }: Route.MetaArgs) {
   ];
 }
 
-// Tudo carregado no servidor: o CEP é dado estático e totalmente reconstruível
-// a partir da URL, então não há fetch no cliente aqui.
+// SSR (1º load): CEP + vizinhos da mesma rua, para HTML completo (SEO/link direto).
 export async function loader({ params }: Route.LoaderArgs) {
   const cep = unmaskCep(params.cep);
   if (cep.length !== 8) {
@@ -38,7 +46,6 @@ export async function loader({ params }: Route.LoaderArgs) {
     throw error;
   }
 
-  // CEPs vizinhos da mesma rua (drill-down final).
   const siblings = detail.streetId
     ? await fetcher<CepListItem[]>(
         endpoints.ceps({ streetId: detail.streetId, limit: 60 })
@@ -52,10 +59,38 @@ export async function loader({ params }: Route.LoaderArgs) {
   };
 }
 
-export default function CepRoute({ loaderData }: Route.ComponentProps) {
+// Navegação client-side não bloqueia: busca via SWR + skeletons (ver local.tsx).
+export async function clientLoader() {
+  return null;
+}
+
+export default function CepRoute({ loaderData, params }: Route.ComponentProps) {
   const location = useLocation();
-  if (!loaderData.found) {
-    const masked = maskCep(loaderData.cep);
+  const cep = unmaskCep(params.cep);
+  const masked = maskCep(cep);
+
+  // No 1º load (SSR) `loaderData` traz CEP + vizinhos; em navegação é null.
+  const ssr =
+    loaderData && "found" in loaderData && loaderData.found ? loaderData : null;
+  const ssrNotFound =
+    loaderData && "found" in loaderData && !loaderData.found;
+  const preview = (location.state as { preview?: DetailPreview } | null)
+    ?.preview;
+
+  const invalid = cep.length !== 8;
+  const { data: detail, error } = useSWR<CepDetail>(
+    invalid || ssrNotFound ? null : endpoints.cep(cep),
+    { fallbackData: ssr?.detail, keepPreviousData: false }
+  );
+
+  const { data: siblingsData } = useSWR<CepListItem[]>(
+    detail?.streetId
+      ? endpoints.ceps({ streetId: detail.streetId, limit: 60 })
+      : null,
+    { fallbackData: ssr?.siblings, keepPreviousData: false }
+  );
+
+  if (invalid || ssrNotFound || (error && isNotFound(error))) {
     return (
       <DetailLayout badge="CEP" title={masked} subtitle="CEP não encontrado">
         <p className="detail-status">
@@ -65,40 +100,66 @@ export default function CepRoute({ loaderData }: Route.ComponentProps) {
     );
   }
 
-  const { detail, siblings } = loaderData;
-  const masked = maskCep(detail.cep);
-  const self: NavFrom = { href: location.pathname, label: masked };
+  if (error) {
+    return (
+      <DetailLayout badge="CEP" title={masked} subtitle="Erro">
+        <p className="detail-status detail-status-error">
+          Não foi possível carregar agora. Tente novamente.
+        </p>
+      </DetailLayout>
+    );
+  }
 
-  // Breadcrumb: caminho até a rua (links prontos) + o próprio CEP (atual).
-  const crumbs = [
-    ...(detail.path ?? []).map((segment) => ({
-      label: segment.nome,
-      href: segment.href,
-    })),
-    { label: masked },
-  ];
+  const self: NavFrom = { href: location.pathname, label: masked };
+  const loading = !detail;
+  const siblingsLoading = !!detail?.streetId && siblingsData === undefined;
+  const siblings = (siblingsData ?? []).filter((item) => item.cep !== cep);
+
+  // Breadcrumb: caminho até a rua (links prontos) + o próprio CEP (atual). Durante
+  // o loading usa o preview do link (mesmo formato) → aparece na hora, sem shift.
+  const crumbs = detail
+    ? [
+        ...(detail.path ?? []).map((segment) => ({
+          label: segment.nome,
+          href: segment.href,
+        })),
+        { label: masked },
+      ]
+    : preview?.breadcrumb;
 
   return (
     <DetailLayout
       badge="CEP"
       title={masked}
-      subtitle={detail.logradouro ?? undefined}
+      subtitle={
+        loading ? (
+          <SkeletonLine width="13rem" height="1.125rem" />
+        ) : (
+          (detail.logradouro ?? undefined)
+        )
+      }
       breadcrumb={crumbs}
       self={self}
     >
-      <div className="detail-grid">
-        <Field label="CEP" value={masked} />
-        <Field label="Logradouro" value={detail.logradouro} />
-        <Field label="Complemento" value={detail.complemento} />
-        <Field label="Bairro" value={detail.bairro} />
-        <Field label="Cidade" value={detail.cidade} />
-        <Field
-          label="Estado"
-          value={detail.estado ? `${detail.estado} (${detail.uf})` : detail.uf}
-        />
-      </div>
+      {loading ? (
+        <DetailSkeletonFields />
+      ) : (
+        <div className="detail-grid">
+          <Field label="CEP" value={masked} />
+          <Field label="Logradouro" value={detail.logradouro} />
+          <Field label="Complemento" value={detail.complemento} />
+          <Field label="Bairro" value={detail.bairro} />
+          <Field label="Cidade" value={detail.cidade} />
+          <Field
+            label="Estado"
+            value={detail.estado ? `${detail.estado} (${detail.uf})` : detail.uf}
+          />
+        </div>
+      )}
 
-      {siblings.length > 0 && (
+      {loading || siblingsLoading ? (
+        <DetailSkeletonList count={6} />
+      ) : siblings.length > 0 ? (
         <section className="detail-section">
           <h2 className="detail-section-title">
             Outros CEPs nesta rua
@@ -117,7 +178,7 @@ export default function CepRoute({ loaderData }: Route.ComponentProps) {
             ))}
           </ul>
         </section>
-      )}
+      ) : null}
     </DetailLayout>
   );
 }

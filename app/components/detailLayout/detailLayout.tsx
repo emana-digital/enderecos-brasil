@@ -17,6 +17,18 @@ export interface NavFrom {
   label: string;
 }
 
+/**
+ * Dados que o link já tem em mãos (nome, nível, breadcrumb) passados via
+ * `state.preview` para o destino pintar o cabeçalho na hora — só a lista entra em
+ * shimmer enquanto o fetch acontece, deixando o layout shift quase nulo.
+ */
+export interface DetailPreview {
+  badge?: string;
+  title: string;
+  subtitle?: string;
+  breadcrumb?: Crumb[];
+}
+
 export interface DetailLayoutProps {
   badge?: string;
   title: ReactNode;

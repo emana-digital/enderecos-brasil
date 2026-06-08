@@ -12,6 +12,7 @@ import {
 } from "react";
 import { useNavigate } from "react-router";
 
+import type { DetailPreview } from "~/components/detailLayout";
 import {
   useAddressSearch,
   useDebouncedValue,
@@ -19,13 +20,16 @@ import {
 } from "~/hooks";
 import {
   matchHistory,
+  maskCep,
   parseQuery,
   readHomeSearch,
   resultIdentity,
   splitActiveToken,
   suggestWordCompletion,
+  TIPO_BADGE,
   vocabularyFromLabels,
   writeHomeSearch,
+  type LocationResult,
 } from "~/lib";
 
 import { Input } from "./input";
@@ -44,6 +48,31 @@ const PLACEHOLDERS = [
 
 const MAX_RECENT = 4;
 const MAX_RESULTS = 8;
+
+/**
+ * Monta o preview que vai no `state` da navegação: a página de destino pinta o
+ * cabeçalho (badge/título/breadcrumb) na hora a partir do que a busca já tem,
+ * deixando só a lista em shimmer (mínimo layout shift). Usa `path` (não `label`,
+ * que é o descritor longo) para o título bater com o `node.nome` do destino.
+ */
+function buildPreview(result: LocationResult): DetailPreview | undefined {
+  if (result.tipo === "cep") {
+    return result.cep
+      ? { badge: "CEP", title: maskCep(result.cep) }
+      : undefined;
+  }
+  const path = result.path;
+  if (!path || path.length === 0) return undefined;
+  const last = path[path.length - 1];
+  return {
+    badge: TIPO_BADGE[last.level],
+    title: last.nome,
+    breadcrumb: path.map((segment, index) => ({
+      label: segment.nome,
+      href: index < path.length - 1 ? segment.href : undefined,
+    })),
+  };
+}
 
 export function AddressSearchInput() {
   const navigate = useNavigate();
@@ -175,8 +204,11 @@ export function AddressSearchInput() {
       setIsFocused(false);
       setDismissed(true);
       inputRef.current?.blur();
-      // Veio da home: o "voltar" da página de destino volta pra cá.
-      navigate(href, { state: { from: { href: "/", label: "a busca" } } });
+      // Veio da home: o "voltar" da página de destino volta pra cá. `preview`
+      // deixa o destino pintar o cabeçalho na hora (só a lista fica em shimmer).
+      navigate(href, {
+        state: { from: { href: "/", label: "a busca" }, preview: buildPreview(result) },
+      });
     },
     [navigate, remember]
   );
