@@ -4,7 +4,8 @@ import { Logo } from "~/components/logo";
 import { clearHomeSearch } from "~/lib";
 
 import "./header.css";
-import { UserArea } from "./userArea";
+// TODO: reativar junto com o nav.
+// import { UserArea } from "./userArea";
 
 export const Header: FC = () => {
   return (
@@ -14,7 +15,9 @@ export const Header: FC = () => {
         <Link to="/" className="logo-container" onClick={clearHomeSearch}>
           <Logo />
         </Link>
-        <nav>
+        {/* TODO: reativar quando as seções existirem (contribuir, últimas
+            atualizações, preços, minha conta). */}
+        {/* <nav>
           <ul>
             <li>
               <Link to="/contribuir">contribuir</Link>
@@ -31,7 +34,7 @@ export const Header: FC = () => {
               </Link>
             </li>
           </ul>
-        </nav>
+        </nav> */}
       </div>
     </header>
   );
